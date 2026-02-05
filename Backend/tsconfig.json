@@ -17,6 +17,6 @@
     "verbatimModuleSyntax": false,
     
   },
-  "include": ["src/**/*.ts", "src/db.js"],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
