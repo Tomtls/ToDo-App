@@ -8,8 +8,8 @@ Ziel ist die praktische Umsetzung zentraler Cloud-Konzepte wie zustandslose Serv
 zustandsbehaftete Datenhaltung, automatisiertes Deployment sowie skalierbarer Betrieb
 in einer Public Cloud.
 
-Die Anwendung ermöglicht es Benutzer:innen, Aufgaben zu erstellen, zu verwalten und zu kategorisieren. 
-Die Authentifizierung erfolgt über Firebase Authentication, die Persistenz erfolgt über eine 
+Die Anwendung ermöglicht es Benutzer:innen, Aufgaben zu erstellen, zu verwalten und zu kategorisieren.
+Die Authentifizierung erfolgt über Firebase Authentication, die Persistenz erfolgt über eine
 relationale Datenbank (PostgreSQL).
 
 ---
@@ -24,14 +24,14 @@ relationale Datenbank (PostgreSQL).
 ---
 
 ## Features
-- Tasks erstellen, bearbeiten, abschliessen, löschen
+- Tasks erstellen, bearbeiten, abschließen, löschen
 - Labels anlegen und Tasks zuordnen
 - Activity-Log für Task-Änderungen (Create/Update/Delete)
 - Filter & Cursor-Pagination für Tasks (status, due_before, limit, cursor)
 
 ---
 
-## Architekturübersicht
+## Architekturübersicht
 
 ### Komponenten
 
@@ -50,7 +50,7 @@ relationale Datenbank (PostgreSQL).
 - Stateless Backend: keine Sitzungsdaten im Service
 - Stateful Storage: Persistenz ausschließlich in PostgreSQL
 - Loose Coupling: Kommunikation über klar definierte APIs
-- Externalized Configuration: Konfiguration über Environment Variablen
+- Externalized Configuration: Konfiguration über Environment-Variablen
 - Automatisierbarkeit: Build- & Deployment-Pipeline vorbereitet
 
 ---
@@ -84,53 +84,55 @@ sodass eine Aufgabe mehreren Kategorien zugeordnet sein kann.
 | Datenbank | PostgreSQL (Cloud SQL) |
 | Authentifizierung | Firebase Authentication |
 | Cloud Provider | Google Cloud Platform |
-| Entwicklung | Cloud SQL Auth Proxy, dotenv |
+| Entwicklung | Docker, dotenv, Prisma |
 
 ---
 
 ## Lokales Setup (Backend)
 
 ### Voraussetzungen
-- Node.js (empfohlen: Node 20 LTS)
-- Google Cloud CLI (`gcloud`)
-- Zugriff auf das Google Cloud Projekt
-- Cloud SQL Auth Proxy
+- Node.js (empfohlen: Node 22 LTS)
+- Docker Desktop (für die lokale PostgreSQL-Datenbank)
 
 ---
 
 ### Repository klonen
 ```bash
 git clone <REPOSITORY_URL>
-cd ToDo-App/backend
+cd ToDo-App/Backend
 npm install
 ```
 
 ---
 
-## Environment Variablen konfigurieren
+## Lokale Datenbank & Backend starten
 
-Für das lokale Setup wird eine `.env` Datei benötigt.
+1) `.env.local` anlegen
+```env
+DATABASE_URL="postgresql://todo:todo@localhost:5432/todo?schema=public"
+```
+
+2) Migrationen ausführen und Server starten
+```bash
+npm run dev:local
+```
+
+Damit werden Docker-DB, Prisma-Migrationen und der Dev-Server gestartet.
+
+---
+
+## Environment Variablen
+
+Für das lokale Setup wird eine `.env.local` Datei benötigt.
 Als Vorlage dient die Datei `.env.example`, die im Repository enthalten ist.
 
 ### Vorlage kopieren
 ```bash
-copy .env.example .env
+copy .env.example .env.local
 ```
 (unter macOS / Linux entsprechend:)
 ```bash
-cp .env.example .env
-```
-
----
-
-### Beispiel .env
-```env
-DB_HOST=127.0.0.1
-DB_PORT=5432
-DB_NAME=todoapp
-DB_USER=todo_user
-DB_PASSWORD="********"
-PORT=8080
+cp .env.example .env.local
 ```
 
 >Hinweis:
