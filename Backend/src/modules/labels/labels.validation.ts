@@ -21,7 +21,7 @@ function validateName(value: unknown, required: boolean, details: Record<string,
   return value.trim();
 }
 
-function validateBase(body: unknown): { ok: false; error: string; details: Record<string, unknown> } | { ok: true; value: Record<string, unknown> } {
+function validateBase(body: unknown): ValidationResult<Record<string, unknown>> {
   if (!isPlainObject(body))
     return {
       ok: false,

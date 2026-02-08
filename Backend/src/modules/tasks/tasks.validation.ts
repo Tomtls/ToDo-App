@@ -15,7 +15,7 @@ function isIsoDateTime(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z$/.test(value);
 }
 
-function validateBase(body: unknown): { ok: false; error: string; details: Record<string, unknown> } | { ok: true; value: TaskInput } {
+function validateBase(body: unknown): ValidationResult<TaskInput> {
   if (!isPlainObject(body))
     return {
       ok: false,
@@ -25,14 +25,14 @@ function validateBase(body: unknown): { ok: false; error: string; details: Recor
   return { ok: true, value: body };
 }
 
-function validateTitle(value: unknown, details: Record<string, unknown>): string | undefined {
+function validateTitle(value: unknown, details: Record<string, unknown>, required = true): string | undefined {
   if (value === undefined) {
-    details.title = "title is required and must be a non-empty string";
+    if (required) details.title = "title is required and must be a non-empty string";
     return undefined;
   }
 
   if (typeof value !== "string" || value.trim().length === 0) {
-    details.title = "title is required and must be a non-empty string";
+    details.title = "title must be a non-empty string";
     return undefined;
   }
 
@@ -75,7 +75,7 @@ export function validateCreateTask(body: unknown): ValidationResult<CreateTaskDt
 
   const details: Record<string, unknown> = {};
 
-  const title = validateTitle(base.value.title, details);
+  const title = validateTitle(base.value.title, details, true);
   const description = validateDescription(base.value.description, details);
   const status = validateStatus(base.value.status, details);
   const due_at = validateIsoField(base.value.due_at, "due_at", details);
@@ -112,7 +112,7 @@ export function validateUpdateTask(body: unknown): ValidationResult<UpdateTaskDt
 
   const details: Record<string, unknown> = {};
 
-  const title = validateTitle(base.value.title, details);
+  const title = validateTitle(base.value.title, details, false);
   const description = validateDescription(base.value.description, details);
   const status = validateStatus(base.value.status, details);
   const due_at = validateIsoField(base.value.due_at, "due_at", details);
@@ -126,6 +126,17 @@ export function validateUpdateTask(body: unknown): ValidationResult<UpdateTaskDt
 
   if (status === "open" && completed_at !== undefined && completed_at !== null)
     details.completed_at = "completed_at must be null when status is open";
+
+  if (
+    title === undefined &&
+    description === undefined &&
+    status === undefined &&
+    due_at === undefined &&
+    completed_at === undefined
+  ) {
+    details.body = "At least one field must be provided";
+  }
+
 
   if (Object.keys(details).length > 0)
     return { ok: false, error: "Validation failed", details };

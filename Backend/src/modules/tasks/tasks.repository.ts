@@ -2,6 +2,13 @@ import { prisma } from "../../db/prisma.js";
 import type { CreateTaskDto, UpdateTaskDto, TaskListFilters } from "./tasks.types.js";
 
 export class TasksRepository {
+  private async ensureOwner(owner_id: string) {
+    await prisma.users.upsert({
+      where: { id: owner_id },
+      update: {},
+      create: { id: owner_id },
+    });
+  }
   async listLatest(owner_id: string, filters?: TaskListFilters) {
     const where: any = { owner_id };
     if (filters?.status) where.status = filters.status;
@@ -28,6 +35,7 @@ export class TasksRepository {
   }
 
   async create(owner_id: string, dto: CreateTaskDto) {
+    await this.ensureOwner(owner_id);
     return prisma.tasks.create({
       data: {
         owner_id,

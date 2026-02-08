@@ -46,15 +46,15 @@ function App() {
   }
 
   // #region Handlers
-  const addLabelFromInput = () => {
-    const value = ensureLabel(taskForm.labelInput);
+  const addLabelFromInput = async () => {
+    const value = await ensureLabel(taskForm.labelInput);
     if (!value) return;
     taskForm.setSelectedLabels((prev) => mergeLabels(prev, [value]));
     taskForm.setLabelInput("");
   };
 
-  const addLabelFromModal = () => {
-    const value = ensureLabel(labelModal.labelModalInput);
+  const addLabelFromModal = async () => {
+    const value = await ensureLabel(labelModal.labelModalInput);
     if (!value) return;
     labelModal.setLabelModalInput("");
   };
@@ -69,12 +69,12 @@ function App() {
     });
   };
 
-  const handleTaskSubmit = (e) => {
+  const handleTaskSubmit = async (e) => {
     if (e && typeof e.preventDefault === "function") {
       e.preventDefault();
     }
 
-    const didSave = addOrUpdateTask({
+    const didSave = await addOrUpdateTask({
       editingTaskId: taskForm.editingTaskId,
       title: taskForm.title,
       description: taskForm.description,
@@ -83,7 +83,6 @@ function App() {
       priority: taskForm.priority,
       selectedLabels: taskForm.selectedLabels,
       labelInput: taskForm.labelInput,
-      ownerId: currentUser?.username,
     });
     if (didSave) {
       taskForm.close();

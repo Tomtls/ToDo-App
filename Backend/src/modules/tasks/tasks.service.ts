@@ -68,9 +68,9 @@ export class TasksService {
 
   async delete(owner_id: string, id: bigint) {
     // ensure exists first for nicer 404
-    await this.getById(owner_id, id);
-    const task = await this.repo.delete(id);
+    const task = await this.getById(owner_id, id);
     await this.activity.logTaskDeleted(owner_id, task.id);
+    await this.repo.delete(task.id);
     return task;
   }
 }

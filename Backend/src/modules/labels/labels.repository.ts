@@ -1,6 +1,13 @@
 import { prisma } from "../../db/prisma.js";
 
 export class LabelsRepository {
+  private async ensureOwner(owner_id: string) {
+    await prisma.users.upsert({
+      where: { id: owner_id },
+      update: {},
+      create: { id: owner_id },
+    });
+  }
   async listByOwner(owner_id: string) {
     return prisma.labels.findMany({
       where: { owner_id },
@@ -21,6 +28,7 @@ export class LabelsRepository {
   }
 
   async create(owner_id: string, name: string) {
+    await this.ensureOwner(owner_id);
     return prisma.labels.create({
       data: { owner_id, name },
     });
