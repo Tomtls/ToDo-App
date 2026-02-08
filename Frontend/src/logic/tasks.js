@@ -1,6 +1,18 @@
-export const labelKey = (label = "") => label.trim().toLowerCase();
+export const getLabelName = (label) => {
+  if (typeof label === "string") return label;
+  if (!label || typeof label !== "object") return "";
+  if (label.labels && typeof label.labels.name === "string") {
+    return label.labels.name;
+  }
+  if (typeof label.name === "string") return label.name;
+  return "";
+};
 
-export const normalizeLabel = (label = "") => label.trim().replace(/^#/, "");
+export const labelKey = (label = "") =>
+  getLabelName(label).trim().toLowerCase();
+
+export const normalizeLabel = (label = "") =>
+  getLabelName(label).trim().replace(/^#/, "");
 
 export const mergeLabels = (base = [], extra = []) => {
   const all = [...(base || []), ...(extra || [])];
@@ -24,15 +36,39 @@ export const normalizePriority = (value) => {
   return Math.round(num);
 };
 
+const PRIORITY_PREFIX = "prio:";
+
+export const isPriorityLabel = (label) =>
+  labelKey(label).startsWith(PRIORITY_PREFIX);
+
+export const getPriorityFromLabels = (labels, fallback = 2) => {
+  const normalizedFallback = normalizePriority(fallback);
+  const list = Array.isArray(labels) ? labels : [];
+  const priorityLabel = list.find((label) => isPriorityLabel(label));
+  if (!priorityLabel) return normalizedFallback;
+  const name = getLabelName(priorityLabel);
+  const value = Number(name.slice(PRIORITY_PREFIX.length));
+  return normalizePriority(value);
+};
+
+export const applyPriorityLabel = (labels, priority) => {
+  const normalizedPriority = normalizePriority(priority);
+  const list = Array.isArray(labels) ? labels : [];
+  const filtered = list.filter((label) => !isPriorityLabel(label));
+  return mergeLabels(filtered, [`${PRIORITY_PREFIX}${normalizedPriority}`]);
+};
+
 export const getDueMs = (task) => {
   if (!task?.due_at) return Number.POSITIVE_INFINITY;
   const date = new Date(task.due_at);
-  return Number.isNaN(date.getTime()) ? Number.POSITIVE_INFINITY : date.getTime();
+  return Number.isNaN(date.getTime())
+    ? Number.POSITIVE_INFINITY
+    : date.getTime();
 };
 
 export const compareTasks = (a, b) => {
   const priorityDiff =
-    normalizePriority(b.priority) - normalizePriority(a.priority);
+    getPriorityFromLabels(b.task_labels) - getPriorityFromLabels(a.task_labels);
   if (priorityDiff !== 0) return priorityDiff;
   const dueDiff = getDueMs(a) - getDueMs(b);
   if (dueDiff !== 0) return dueDiff;
@@ -100,25 +136,34 @@ export const normalizeTask = (task, ownerId) => {
   const createdAt = toIsoOrNull(task.created_at) || nowIso;
   const updatedAt = toIsoOrNull(task.updated_at) || createdAt;
   const completed =
-    task.status === "completed" || task.completed === true || task.completed_at;
+    task.status === "done" ||
+    task.status === "completed" ||
+    task.completed === true ||
+    task.completed_at;
 
   const taskLabels = Array.isArray(task.task_labels)
     ? task.task_labels
     : Array.isArray(task.labels)
-    ? task.labels
-    : [];
+      ? task.labels
+      : [];
+  const baseLabels = mergeLabels([], taskLabels);
+  const normalizedLabels =
+    task.priority === undefined || task.priority === null
+      ? baseLabels
+      : applyPriorityLabel(baseLabels, task.priority);
 
   return {
     id: String(task.id ?? Date.now()),
     owner_id: task.owner_id || ownerId || "dev-user",
     title: (task.title || "").trim(),
     description: task.description ?? null,
-    status: completed ? "completed" : "open",
-    priority: normalizePriority(task.priority ?? 2),
+    status: completed ? "done" : "open",
     due_at: dueAt,
     created_at: createdAt,
     updated_at: updatedAt,
-    completed_at: completed ? toIsoOrNull(task.completed_at) || updatedAt : null,
-    task_labels: mergeLabels([], taskLabels),
+    completed_at: completed
+      ? toIsoOrNull(task.completed_at) || updatedAt
+      : null,
+    task_labels: normalizedLabels,
   };
 };
