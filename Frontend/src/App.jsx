@@ -14,7 +14,7 @@ import "./App.css";
 
 function App() {
   // #region Hooks & State
-  const { currentUser, setCurrentUser, logout } = useAuth();
+  const { currentUser, setCurrentUser, logout, authReady } = useAuth();
   const {
     tasks,
     labels,
@@ -26,7 +26,7 @@ function App() {
   const taskForm = useTaskForm();
   const labelModal = useLabelModal();
 
-  const [view, setView] = useState("today");
+  const [view, setView] = useState("upcoming");
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeLabel, setActiveLabel] = useState("");
@@ -40,6 +40,10 @@ function App() {
     getLabelCount,
   } = useTaskFilters({ tasks, view, searchQuery, activeLabel });
   // #endregion Hooks & State
+
+  if (!authReady) {
+    return null;
+  }
 
   if (!currentUser) {
     return <Login onLogin={setCurrentUser} />;
@@ -74,6 +78,11 @@ function App() {
       e.preventDefault();
     }
 
+    if (!taskForm.title.trim()) {
+      alert("Bitte geben Sie einen Titel für die Aufgabe ein.");
+      return;
+    }
+
     const didSave = await addOrUpdateTask({
       editingTaskId: taskForm.editingTaskId,
       title: taskForm.title,
@@ -86,6 +95,8 @@ function App() {
     });
     if (didSave) {
       taskForm.close();
+    } else {
+      alert("Fehler beim Speichern der Aufgabe. Bitte versuchen Sie es erneut.");
     }
   };
 

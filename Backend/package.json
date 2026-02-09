@@ -6,34 +6,24 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "prisma generate && tsc",
+    "build": "tsc",
     "start": "node dist/server.js",
 
-    "dev:local": "npm run db:up && npm run migrate:dev:local && npm run dev:local:app",
+    "dev:local": "npm run dev:local:app",
     "start:local": "dotenv -e .env.local -- npm run start",
 
-    "dev:local:app": "dotenv -e .env.local -- npm run dev",
-
-    "db:up": "docker compose up -d",
-    "db:down": "docker compose down",
-    "db:reset": "docker compose down -v && docker compose up -d",
-
-    "migrate:deploy:local": "dotenv -e .env.local -- prisma migrate deploy",
-    "migrate:dev:local": "dotenv -e .env.local -- prisma migrate dev --name init"
+    "dev:local:app": "dotenv -e .env.local -- npm run dev"
   },
   "dependencies": {
-    "@prisma/client": "^6.19.2",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
-    "pg": "^8.18.0"
+    "firebase-admin": "^12.0.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^25.2.1",
-    "@types/pg": "^8.16.0",
     "dotenv-cli": "^11.0.0",
     "nodemon": "^3.1.11",
-    "prisma": "^6.19.2",
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"

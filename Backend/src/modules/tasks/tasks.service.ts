@@ -12,7 +12,7 @@ export class TasksService {
     return this.repo.listLatest(owner_id, filters);
   }
 
-  async getById(owner_id: string, id: bigint) {
+  async getById(owner_id: string, id: string) {
     const task = await this.repo.findById(owner_id, id);
     if (!task) {
       const err: any = new Error("Task not found");
@@ -33,10 +33,15 @@ export class TasksService {
     return task;
   }
 
-  async update(owner_id: string, id: bigint, dto: UpdateTaskDto) {
+  async update(owner_id: string, id: string, dto: UpdateTaskDto) {
     // ensure exists first for nicer 404
     const before = await this.getById(owner_id, id);
-    const task = await this.repo.update(id, dto);
+    const task = await this.repo.update(owner_id, id, dto);
+    if (!task) {
+      const err: any = new Error("Task not found");
+      err.statusCode = 404;
+      throw err;
+    }
 
     const changePayload: Record<string, { before: unknown; after: unknown }> = {};
     const normalize = (value: unknown) =>
@@ -66,11 +71,11 @@ export class TasksService {
     return task;
   }
 
-  async delete(owner_id: string, id: bigint) {
+  async delete(owner_id: string, id: string) {
     // ensure exists first for nicer 404
     const task = await this.getById(owner_id, id);
     await this.activity.logTaskDeleted(owner_id, task.id);
-    await this.repo.delete(task.id);
+    await this.repo.delete(owner_id, task.id);
     return task;
   }
 }

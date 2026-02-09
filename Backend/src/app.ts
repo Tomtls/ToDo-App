@@ -2,7 +2,9 @@ import express from "express";
 import { tasksRouter } from "./modules/tasks/tasks.routes.js";
 import { labelsRouter, taskLabelsRouter } from "./modules/labels/labels.routes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
+import { verifyFirebaseToken } from "./middlewares/firebaseAuth.js";
 import { env } from "./config/env.js";
+import { isFirebaseAdminConfigured } from "./firebaseAdmin.js";
 
 export const app = express();
 
@@ -32,6 +34,14 @@ app.use((req, res, next) => {
 });
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
+
+if (isFirebaseAdminConfigured()) {
+  app.use(verifyFirebaseToken);
+} else {
+  console.warn(
+    "Firebase auth disabled. Set FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_PATH to enable."
+  );
+}
 
 app.use("/tasks", tasksRouter);
 app.use("/tasks", taskLabelsRouter);

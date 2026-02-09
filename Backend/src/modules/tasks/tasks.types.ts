@@ -27,5 +27,5 @@ export type TaskListFilters = {
   due_before?: string;
   due_after?: string;
   limit?: number;
-  cursor?: bigint;
+  cursor?: string;
 };

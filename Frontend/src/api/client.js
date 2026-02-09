@@ -1,3 +1,5 @@
+import { auth } from "../firebase";
+
 const DEFAULT_API_BASE_URL = "http://localhost:8080";
 
 const apiBaseUrl =
@@ -29,6 +31,15 @@ export async function apiFetch(path, options = {}) {
       ...headers,
     },
   };
+
+  try {
+    const token = await auth.currentUser?.getIdToken();
+    if (token) {
+      request.headers.Authorization = `Bearer ${token}`;
+    }
+  } catch (error) {
+    // Ignore token errors and continue without auth header.
+  }
 
   if (body !== undefined) {
     request.headers["Content-Type"] = "application/json";

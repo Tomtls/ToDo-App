@@ -1,15 +1,23 @@
-﻿import { useState } from "react";
+import { useEffect, useState } from "react";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "../firebase";
 
 export function useAuth() {
-  const [currentUser, setCurrentUser] = useState(() => {
-    const raw = localStorage.getItem("currentUser");
-    return raw ? JSON.parse(raw) : null;
-  });
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
 
-  const logout = () => {
-    localStorage.removeItem("currentUser");
-    setCurrentUser(null);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      setAuthReady(true);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const logout = async () => {
+    await signOut(auth);
   };
 
-  return { currentUser, setCurrentUser, logout };
+  return { currentUser, setCurrentUser, logout, authReady };
 }

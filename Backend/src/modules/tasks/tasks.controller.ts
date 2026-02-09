@@ -1,29 +1,30 @@
 import type { Request, Response } from "express";
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { serializeBigInt } from "../../utils/json.js";
 import type { TaskListResponse } from "./tasks.types.js";
 import { parseTaskListQuery } from "./tasks.query.js";
 import { TasksService } from "./tasks.service.js";
 import { validateCreateTask, validateUpdateTask } from "./tasks.validation.js";
 
-function parseId(param: string | string[]): bigint {
-  // IDs kommen als String. Prisma will bigint.
-  // BigInt("123") geht. BigInt("abc") knallt -> wir geben 400.
-  try {
-    const idString = Array.isArray(param) ? param[0] : param;
-    return BigInt(idString);
-  } catch {
+function parseId(param: string | string[]): string {
+  const idString = Array.isArray(param) ? param[0] : param;
+  if (typeof idString !== "string" || idString.trim().length === 0) {
     const err: any = new Error("Invalid id");
     err.statusCode = 400;
     throw err;
   }
+  return idString.trim();
+}
+
+function getOwnerId(res: Response): string {
+  const uid = res.locals?.user?.uid;
+  return typeof uid === "string" && uid.length > 0 ? uid : "dev-user";
 }
 
 export class TasksController {
   constructor(private readonly service: TasksService) { }
 
   list = asyncHandler(async (req: Request, res: Response) => {
-    const owner_id = "dev-user";
+    const owner_id = getOwnerId(res);
     const queryValidation = parseTaskListQuery(req.query);
     if (!queryValidation.ok) {
       res.status(400).json({ error: queryValidation.error, details: queryValidation.details });
@@ -40,18 +41,18 @@ export class TasksController {
       items: tasks,
       next_cursor,
     };
-    res.json(serializeBigInt(response));
+    res.json(response);
   });
 
   getById = asyncHandler(async (req: Request, res: Response) => {
-    const owner_id = "dev-user";
+    const owner_id = getOwnerId(res);
     const id = parseId(req.params.id);
     const task = await this.service.getById(owner_id, id);
-    res.json(serializeBigInt(task));
+    res.json(task);
   });
 
   create = asyncHandler(async (req: Request, res: Response) => {
-    const owner_id = "dev-user";
+    const owner_id = getOwnerId(res);
     const validation = validateCreateTask(req.body);
     if (!validation.ok) {
       res.status(400).json({ error: validation.error, details: validation.details });
@@ -59,11 +60,11 @@ export class TasksController {
     }
 
     const task = await this.service.create(owner_id, validation.value);
-    res.status(201).json(serializeBigInt(task));
+    res.status(201).json(task);
   });
 
   update = asyncHandler(async (req: Request, res: Response) => {
-    const owner_id = "dev-user";
+    const owner_id = getOwnerId(res);
     const id = parseId(req.params.id);
     const validation = validateUpdateTask(req.body);
     if (!validation.ok) {
@@ -72,11 +73,11 @@ export class TasksController {
     }
 
     const task = await this.service.update(owner_id, id, validation.value);
-    res.json(serializeBigInt(task));
+    res.json(task);
   });
 
   remove = asyncHandler(async (req: Request, res: Response) => {
-    const owner_id = "dev-user";
+    const owner_id = getOwnerId(res);
     const id = parseId(req.params.id);
     await this.service.delete(owner_id, id);
     res.status(204).send();

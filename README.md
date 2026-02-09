@@ -107,6 +107,19 @@ npm install
 
 ## Lokale Datenbank & Backend starten
 
+
+Installieren
+npm install --prefix Frontend
+npm install --prefix Backend
+
+Starten (lokal)
+npm run start:local --prefix Backend
+npm run dev --prefix Frontend -- --host 127.0.0.1 --port 5173
+
+Optionaler Build Check:
+npm run build --prefix Backend
+npm run build --prefix Frontend
+
 1) `.env.local` anlegen
 ```env
 DATABASE_URL="postgresql://todo:todo@localhost:5432/todo?schema=public"
@@ -137,3 +150,5 @@ cp .env.example .env.local
 
 >Hinweis:
 >Passwörter oder Secrets mit Sonderzeichen (z.B. #, !, $) müssen in Anführungszeichen gesetzt werden, da sie sonst in `.env` Dateien als Kommentar interpretiert werden.
+
+
