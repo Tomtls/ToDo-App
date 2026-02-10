@@ -11,12 +11,11 @@ steps:
       - -m
       - rsync
       - -r
-      - -d
       - Frontend/dist
       - gs://${_FRONTEND_BUCKET}
 
 substitutions:
-  _VITE_API_BASE_URL: https://todo-api-1035557533758.europe-west3.run.app
+  _VITE_API_BASE_URL: https://todo-api-48417328230.europe-west10.run.app
   _FRONTEND_BUCKET: todo-cloud
 
 options:
