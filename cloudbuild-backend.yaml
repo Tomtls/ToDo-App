@@ -28,7 +28,7 @@ substitutions:
   _REGION: europe-west10
   _AR_REPO: todo-app
   _SERVICE_NAME: todo-api
-  _FIREBASE_SA_SECRET: projects/$PROJECT_ID/secrets/firebase-service-account
+  _FIREBASE_SA_SECRET: firebase-service-account
 
 options:
   logging: CLOUD_LOGGING_ONLY
