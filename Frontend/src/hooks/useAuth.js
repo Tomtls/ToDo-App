@@ -1,22 +1,40 @@
 import { useEffect, useState } from "react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from "../firebase";
+import { supabase } from "../supabaseClient";
 
 export function useAuth() {
   const [currentUser, setCurrentUser] = useState(null);
   const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-      setAuthReady(true);
-    });
+    let canceled = false;
 
-    return () => unsubscribe();
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (canceled) return;
+        setCurrentUser(data?.session?.user ?? null);
+        setAuthReady(true);
+      })
+      .catch(() => {
+        if (!canceled) setAuthReady(true);
+      });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (canceled) return;
+        setCurrentUser(session?.user ?? null);
+        setAuthReady(true);
+      }
+    );
+
+    return () => {
+      canceled = true;
+      authListener?.subscription?.unsubscribe();
+    };
   }, []);
 
   const logout = async () => {
-    await signOut(auth);
+    await supabase.auth.signOut();
   };
 
   return { currentUser, setCurrentUser, logout, authReady };

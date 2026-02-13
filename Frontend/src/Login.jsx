@@ -1,39 +1,34 @@
 import { useState } from "react";
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
-import { auth } from "./firebase";
+import { supabase } from "./supabaseClient";
 import "./App.css";
 
-function getFirebaseErrorMessage(error, isRegistering) {
-  const code = error && typeof error === "object" ? error.code : "";
+function getSupabaseErrorMessage(error, isRegistering) {
+  const message = error && typeof error === "object" && error.message ? String(error.message) : "";
+  const lowered = message.toLowerCase();
 
   if (isRegistering) {
-    switch (code) {
-      case "auth/email-already-in-use":
-        return "Diese E-Mail ist bereits registriert.";
-      case "auth/invalid-email":
-        return "Bitte eine gueltige E-Mail-Adresse eingeben.";
-      case "auth/weak-password":
-        return "Passwort zu schwach (mindestens 6 Zeichen).";
-      default:
-        return "Registrierung fehlgeschlagen. Bitte erneut versuchen.";
-    }
+    if (lowered.includes("already registered"))
+      return "Diese E-Mail ist bereits registriert.";
+
+    if (lowered.includes("password"))
+      return "Passwort zu schwach (mindestens 6 Zeichen).";
+
+    if (lowered.includes("email") && lowered.includes("invalid"))
+      return "Bitte eine gültige E-Mail-Adresse eingeben.";
+
+    return "Registrierung fehlgeschlagen. Bitte erneut versuchen.";
   }
 
-  switch (code) {
-    case "auth/invalid-credential":
-      return "Falsche Zugangsdaten.";
-    case "auth/user-not-found":
-      return "Nutzer nicht gefunden.";
-    case "auth/wrong-password":
-      return "Falsches Passwort.";
-    case "auth/invalid-email":
-      return "Bitte eine gueltige E-Mail-Adresse eingeben.";
-    default:
-      return "Login fehlgeschlagen. Bitte erneut versuchen.";
-  }
+  if (lowered.includes("invalid login credentials"))
+    return "Falsche Zugangsdaten.";
+  
+  if (lowered.includes("email") && lowered.includes("invalid"))
+    return "Bitte eine gültige E-Mail-Adresse eingeben.";
+  
+  if (lowered.includes("email not confirmed")) 
+    return "Bitte E-Mail bestätigen.";
+  
+  return "Login fehlgeschlagen. Bitte erneut versuchen.";
 }
 
 function Login({ onLogin }) {
@@ -48,26 +43,27 @@ function Login({ onLogin }) {
     setIsSubmitting(true);
 
     try {
-      let userCredential;
-      if (isRegistering) {
-        userCredential = await createUserWithEmailAndPassword(
-          auth,
+      let authResult;
+      if (isRegistering)
+        authResult = await supabase.auth.signUp({ email, password });
+      else
+        authResult = await supabase.auth.signInWithPassword({
           email,
-          password
-        );
-      } else {
-        userCredential = await signInWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
-      }
+          password,
+        });
 
-      if (typeof onLogin === "function") {
-        onLogin(userCredential.user);
-      }
+      if (authResult?.error)
+        throw authResult.error;
+
+      const user = authResult?.data?.user || authResult?.data?.session?.user || null;
+
+      if (isRegistering && !authResult?.data?.session)
+        alert("Bitte E-Mail bestaetigen, bevor du dich einloggst.");
+
+      if (user && typeof onLogin === "function")
+        onLogin(user);
     } catch (error) {
-      alert(getFirebaseErrorMessage(error, isRegistering));
+      alert(getSupabaseErrorMessage(error, isRegistering));
     } finally {
       setIsSubmitting(false);
     }

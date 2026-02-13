@@ -1,4 +1,4 @@
-import { auth } from "../firebase";
+import { supabase } from "../supabaseClient";
 
 const DEFAULT_API_BASE_URL = "http://localhost:8080";
 
@@ -33,7 +33,8 @@ export async function apiFetch(path, options = {}) {
   };
 
   try {
-    const token = await auth.currentUser?.getIdToken();
+    const { data } = await supabase.auth.getSession();
+    const token = data?.session?.access_token;
     if (token) {
       request.headers.Authorization = `Bearer ${token}`;
     }
