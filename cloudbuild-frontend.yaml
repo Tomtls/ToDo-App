@@ -4,7 +4,7 @@ steps:
     env:
       - VITE_API_BASE_URL=${_VITE_API_BASE_URL}
       - VITE_SUPABASE_URL=${_VITE_SUPABASE_URL}
-      - VITE_SUPABASE_ANON_KEY=${_VITE_SUPABASE_ANON_KEY}
+      - VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY=${_VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY}
     script: |
       npm ci
       npm run build
@@ -19,7 +19,7 @@ steps:
 substitutions:
   _VITE_API_BASE_URL: https://todo-458237170651.europe-west3.run.app
   _VITE_SUPABASE_URL: https://your-project-ref.supabase.co
-  _VITE_SUPABASE_ANON_KEY: your-publishable-key
+  _VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY: your-publishable-key
   _FRONTEND_BUCKET: cloud-todo
 
 options:
