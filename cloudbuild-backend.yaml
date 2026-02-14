@@ -4,6 +4,8 @@ steps:
       - build
       - -f
       - Backend/Dockerfile
+      - --build-arg
+      - DATABASE_URL=postgresql://user:pass@localhost:5432/postgres
       - -t
       - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE_NAME}:$SHORT_SHA
       - .
