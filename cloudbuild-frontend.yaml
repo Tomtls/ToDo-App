@@ -3,12 +3,8 @@ steps:
     dir: Frontend
     env:
       - VITE_API_BASE_URL=${_VITE_API_BASE_URL}
-      - VITE_FIREBASE_API_KEY=${_VITE_FIREBASE_API_KEY}
-      - VITE_FIREBASE_AUTH_DOMAIN=${_VITE_FIREBASE_AUTH_DOMAIN}
-      - VITE_FIREBASE_PROJECT_ID=${_VITE_FIREBASE_PROJECT_ID}
-      - VITE_FIREBASE_STORAGE_BUCKET=${_VITE_FIREBASE_STORAGE_BUCKET}
-      - VITE_FIREBASE_MESSAGING_SENDER_ID=${_VITE_FIREBASE_MESSAGING_SENDER_ID}
-      - VITE_FIREBASE_APP_ID=${_VITE_FIREBASE_APP_ID}
+      - VITE_SUPABASE_URL=${_VITE_SUPABASE_URL}
+      - VITE_SUPABASE_ANON_KEY=${_VITE_SUPABASE_ANON_KEY}
     script: |
       npm ci
       npm run build
@@ -21,13 +17,9 @@ steps:
       - gs://${_FRONTEND_BUCKET}
 
 substitutions:
-  _VITE_API_BASE_URL: https://todo-api-48417328230.europe-west10.run.app
-  _VITE_FIREBASE_API_KEY: "AIzaSyCCwelvNWqzAaEkDxtAv85krD5qLjZyB_s"
-  _VITE_FIREBASE_AUTH_DOMAIN: "todo-app-82241.firebaseapp.com"
-  _VITE_FIREBASE_PROJECT_ID: "todo-app-82241"
-  _VITE_FIREBASE_STORAGE_BUCKET: "todo-app-82241.firebasestorage.app"
-  _VITE_FIREBASE_MESSAGING_SENDER_ID: "441537935555"
-  _VITE_FIREBASE_APP_ID: "1:441537935555:web:c4cd44540abd6bd1768a76"
+  _VITE_API_BASE_URL: https://todo-458237170651.europe-west3.run.app
+  _VITE_SUPABASE_URL: https://your-project-ref.supabase.co
+  _VITE_SUPABASE_ANON_KEY: your-publishable-key
   _FRONTEND_BUCKET: cloud-todo
 
 options:

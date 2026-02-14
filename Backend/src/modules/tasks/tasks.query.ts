@@ -17,13 +17,14 @@ function parseLimit(value: unknown): number | undefined {
   return Math.min(num, 200);
 }
 
-function parseCursor(value: unknown): string | undefined {
+function parseCursor(value: unknown): bigint | undefined {
   if (value === undefined) return undefined;
 
   const raw = Array.isArray(value) ? value[0] : value;
   if (typeof raw !== "string" || raw.trim().length === 0) return undefined;
 
-  return raw.trim();
+  try { return BigInt(raw); }
+  catch { return undefined; }
 }
 
 function parseStatus(value: unknown): TaskStatus | undefined {
