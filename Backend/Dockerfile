@@ -20,6 +20,7 @@ COPY Backend/package*.json ./
 RUN npm ci --omit=dev
 COPY Backend/prisma ./prisma
 COPY Backend/prisma.config.ts ./
+COPY Backend/src/config/database-url.ts ./src/config/database-url.ts
 RUN npx prisma generate
 COPY --from=build /app/dist ./dist
 EXPOSE 8080
