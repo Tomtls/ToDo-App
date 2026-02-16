@@ -6,21 +6,28 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "prisma generate && tsc",
+    "build": "npx prisma generate && tsc",
     "start": "node dist/server.js",
 
-    "dev:local": "npm run dev:local:app",
+    "dev:local": "dotenv -e .env.local -- npm run dev",
+    "dev:setup": "npm run dev:local:setup",
+    "dev:local:setup": "npm run db:reset:local && npm run db:wait:local && npm run db:push:local && npm run db:generate:local && npm run dev:local",
     "start:local": "dotenv -e .env.local -- npm run start",
+    "db:migrate:remote": "dotenv -e .env -- npx prisma migrate deploy",
+    "db:push:remote": "dotenv -e .env -- npx prisma db push",
+    "db:pull:remote": "dotenv -e .env -- npx prisma db pull",
+    "db:generate:remote": "dotenv -e .env -- npx prisma generate",
 
-    "dev:local:app": "dotenv -e .env.local -- npm run dev",
+    "db:up:local": "docker compose up -d",
+    "db:down:local": "docker compose down",
+    "db:reset:local": "docker compose down -v && docker compose up -d",
+    "db:delete:local": "docker compose down -v --remove-orphans",
+    "db:wait:local": "docker compose exec -T db pg_isready -U postgres -d appdb",
 
-    "db:up": "docker compose up -d",
-    "db:down": "docker compose down",
-    "db:reset": "docker compose down -v && docker compose up -d",
-
-    "db:pull": "prisma db pull",
-    "db:pull:local": "dotenv -e .env.local -- prisma db pull",
-    "db:generate:local": "dotenv -e .env.local -- prisma generate"
+    "db:migrate:local": "dotenv -e .env.local -- npx prisma migrate dev",
+    "db:push:local": "dotenv -e .env.local -- npx prisma db push",
+    "db:pull:local": "dotenv -e .env.local -- npx prisma db pull",
+    "db:generate:local": "dotenv -e .env.local -- npx prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.19.2",
