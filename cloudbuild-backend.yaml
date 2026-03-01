@@ -27,16 +27,12 @@ steps:
       - --allow-unauthenticated
       - --set-secrets
       - DATABASE_URL=${_DATABASE_URL_SECRET}:latest
-      - --set-env-vars
-      - SUPABASE_JWT_ISSUER=${_SUPABASE_JWT_ISSUER},CORS_ORIGINS=${_CORS_ORIGINS}
 
 substitutions:
   _REGION: europe-west3
   _AR_REPO: todo-app
   _SERVICE_NAME: todo-api
   _DATABASE_URL_SECRET: supabase-database-url
-  _SUPABASE_JWT_ISSUER: https://your-project-ref.supabase.co/auth/v1
-  _CORS_ORIGINS: https://your-frontend-domain
 
 options:
   logging: CLOUD_LOGGING_ONLY
