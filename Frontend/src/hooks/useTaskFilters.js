@@ -59,7 +59,7 @@ export function useTaskFilters({ tasks, view, searchQuery, activeLabel }) {
         const statusLabel = getStatusLabel(task);
         const dueLabel = task.due_at
           ? hasMeaningfulTime(task.due_at)
-            ? `${formatTime(task.due_at)} Uhr`
+            ? `${formatDate(task.due_at)} ${formatTime(task.due_at)} Uhr`
             : formatDate(task.due_at)
           : "";
         const meta = [statusLabel, dueLabel].filter(Boolean).join(" • ");
@@ -93,6 +93,7 @@ export function useTaskFilters({ tasks, view, searchQuery, activeLabel }) {
       const matchesSearch = !query || searchText.includes(query);
 
       const matchesLabel =
+        view === "all" ||
         !activeLabel ||
         taskLabels.some((label) => labelKey(label) === labelKey(activeLabel));
 
@@ -111,7 +112,8 @@ export function useTaskFilters({ tasks, view, searchQuery, activeLabel }) {
 
       const matchesView = isSearching
         ? true
-        : view === "label" ||
+        : view === "all" ||
+          view === "label" ||
           (view === "today" && isToday) ||
           (view === "upcoming" && isUpcoming) ||
           (view === "completed" && isCompleted) ||
@@ -133,6 +135,8 @@ export function useTaskFilters({ tasks, view, searchQuery, activeLabel }) {
       ? activeLabel
         ? `#${activeLabel}`
         : "Labels"
+      : view === "all"
+        ? "Alle Aufgaben"
       : view === "completed"
         ? "Erledigte Aufgaben"
         : view === "expired"

@@ -405,6 +405,10 @@ textarea::placeholder {
   color: var(--muted);
 }
 
+.task-date {
+  color: var(--muted);
+}
+
 .task-time {
   color: var(--accent);
   font-weight: 600;

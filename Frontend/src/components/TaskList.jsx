@@ -80,15 +80,17 @@ export default function TaskList({
                 </div>
                 {(task.due_at || task.description) && (
                   <div className="task-meta">
-                    {task.due_at && showTime && (
-                      <span className="task-time">
-                        {formatTime(task.due_at)} Uhr
-                      </span>
-                    )}
-                    {task.due_at && !showTime && (
-                      <span className="task-time">
-                        {formatDate(task.due_at)}
-                      </span>
+                    {task.due_at && (
+                      <>
+                        <span className={showTime ? "task-date" : "task-time"}>
+                          {formatDate(task.due_at)}
+                        </span>
+                        {showTime && (
+                          <span className="task-time">
+                            {formatTime(task.due_at)} Uhr
+                          </span>
+                        )}
+                      </>
                     )}
                     {task.description && (
                       <span className="task-desc">{task.description}</span>
