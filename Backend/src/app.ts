@@ -2,9 +2,8 @@ import express from "express";
 import { tasksRouter } from "./modules/tasks/tasks.routes.js";
 import { labelsRouter, taskLabelsRouter } from "./modules/labels/labels.routes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
-import { verifyFirebaseToken } from "./middlewares/firebaseAuth.js";
-import { env } from "./config/env.js";
-import { isFirebaseAdminConfigured } from "./firebaseAdmin.js";
+import { verifySupabaseToken } from "./middlewares/supabaseAuth.js";
+import { env, isSupabaseAuthConfigured } from "./config/env.js";
 
 export const app = express();
 
@@ -35,11 +34,11 @@ app.use((req, res, next) => {
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
-if (isFirebaseAdminConfigured()) {
-  app.use(verifyFirebaseToken);
+if (isSupabaseAuthConfigured()) {
+  app.use(verifySupabaseToken);
 } else {
   console.warn(
-    "Firebase auth disabled. Set FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_PATH to enable."
+    "Supabase auth disabled. Set SUPABASE_JWT_ISSUER to enable."
   );
 }
 

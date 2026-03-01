@@ -6,24 +6,41 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
+    "build": "npx prisma generate && tsc",
     "start": "node dist/server.js",
 
-    "dev:local": "npm run dev:local:app",
+    "dev:local": "dotenv -e .env.local -- npm run dev",
+    "dev:setup": "npm run dev:local:setup",
+    "dev:local:setup": "npm run db:reset:local && npm run db:wait:local && npm run db:push:local && npm run db:generate:local && npm run dev:local",
     "start:local": "dotenv -e .env.local -- npm run start",
+    "db:migrate:remote": "dotenv -e .env -- npx prisma migrate deploy",
+    "db:push:remote": "dotenv -e .env -- npx prisma db push",
+    "db:pull:remote": "dotenv -e .env -- npx prisma db pull",
+    "db:generate:remote": "dotenv -e .env -- npx prisma generate",
 
-    "dev:local:app": "dotenv -e .env.local -- npm run dev"
+    "db:up:local": "docker compose up -d",
+    "db:down:local": "docker compose down",
+    "db:reset:local": "docker compose down -v && docker compose up -d",
+    "db:delete:local": "docker compose down -v --remove-orphans",
+    "db:wait:local": "docker compose exec -T db pg_isready -U postgres -d appdb",
+
+    "db:migrate:local": "dotenv -e .env.local -- npx prisma migrate dev",
+    "db:push:local": "dotenv -e .env.local -- npx prisma db push",
+    "db:pull:local": "dotenv -e .env.local -- npx prisma db pull",
+    "db:generate:local": "dotenv -e .env.local -- npx prisma generate"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.2",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
-    "firebase-admin": "^12.0.0"
+    "jose": "^5.2.4"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^25.2.1",
     "dotenv-cli": "^11.0.0",
     "nodemon": "^3.1.11",
+    "prisma": "^6.19.2",
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"

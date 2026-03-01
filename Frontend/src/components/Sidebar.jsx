@@ -1,6 +1,7 @@
 ﻿import { getLabelName, labelKey } from "../logic/tasks";
 
 const NAV_ITEMS = [
+  { id: "all", label: "Alle Aufgaben" },
   { id: "today", label: "Heute" },
   { id: "upcoming", label: "Demnächst" },
   { id: "completed", label: "Erledigte Aufgaben" },
@@ -70,7 +71,12 @@ export default function Sidebar({
           <button
             key={item.id}
             className={`nav-item ${view === item.id ? "active" : ""}`}
-            onClick={() => onViewChange(item.id)}
+            onClick={() => {
+              if (item.id === "all") {
+                onActiveLabelChange("");
+              }
+              onViewChange(item.id);
+            }}
             type="button"
           >
             {item.label}

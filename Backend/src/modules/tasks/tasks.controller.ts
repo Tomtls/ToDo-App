@@ -1,18 +1,20 @@
 import type { Request, Response } from "express";
 import { asyncHandler } from "../../utils/asyncHandler.js";
+import { serializeBigInt } from "../../utils/json.js";
 import type { TaskListResponse } from "./tasks.types.js";
 import { parseTaskListQuery } from "./tasks.query.js";
 import { TasksService } from "./tasks.service.js";
 import { validateCreateTask, validateUpdateTask } from "./tasks.validation.js";
 
-function parseId(param: string | string[]): string {
-  const idString = Array.isArray(param) ? param[0] : param;
-  if (typeof idString !== "string" || idString.trim().length === 0) {
+function parseId(param: string | string[]): bigint {
+  try {
+    const idString = Array.isArray(param) ? param[0] : param;
+    return BigInt(idString);
+  } catch {
     const err: any = new Error("Invalid id");
     err.statusCode = 400;
     throw err;
   }
-  return idString.trim();
 }
 
 function getOwnerId(res: Response): string {
@@ -41,14 +43,14 @@ export class TasksController {
       items: tasks,
       next_cursor,
     };
-    res.json(response);
+    res.json(serializeBigInt(response));
   });
 
   getById = asyncHandler(async (req: Request, res: Response) => {
     const owner_id = getOwnerId(res);
     const id = parseId(req.params.id);
     const task = await this.service.getById(owner_id, id);
-    res.json(task);
+    res.json(serializeBigInt(task));
   });
 
   create = asyncHandler(async (req: Request, res: Response) => {
@@ -60,7 +62,7 @@ export class TasksController {
     }
 
     const task = await this.service.create(owner_id, validation.value);
-    res.status(201).json(task);
+    res.status(201).json(serializeBigInt(task));
   });
 
   update = asyncHandler(async (req: Request, res: Response) => {
@@ -73,7 +75,7 @@ export class TasksController {
     }
 
     const task = await this.service.update(owner_id, id, validation.value);
-    res.json(task);
+    res.json(serializeBigInt(task));
   });
 
   remove = asyncHandler(async (req: Request, res: Response) => {
