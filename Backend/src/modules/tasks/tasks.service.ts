@@ -36,7 +36,11 @@ export class TasksService {
   async update(owner_id: string, id: bigint, dto: UpdateTaskDto) {
     // ensure exists first for nicer 404
     const before = await this.getById(owner_id, id);
-    const task = await this.repo.update(id, dto);
+    const normalized: UpdateTaskDto = { ...dto };
+    if (normalized.status === "open" && normalized.completed_at === undefined) {
+      normalized.completed_at = null;
+    }
+    const task = await this.repo.update(id, normalized);
 
     const changePayload: Record<string, { before: unknown; after: unknown }> = {};
     const normalize = (value: unknown) =>
