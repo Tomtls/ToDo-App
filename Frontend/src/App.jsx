@@ -131,6 +131,7 @@ function App() {
         filteredCount={filteredTasks.length}
         taskCountLabel={taskCountLabel}
         tasks={sortedTasks}
+        view={view}
         onLogout={logout}
         onOpenEdit={taskForm.openEdit}
         onToggle={toggleTask}
